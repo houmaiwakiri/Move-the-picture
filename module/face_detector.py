@@ -1,7 +1,7 @@
 import cv2
 import pygame
 import os
-from fer import FER
+from deepface import DeepFace
 
 def load_image(image_path):
     return pygame.image.load(image_path)
@@ -9,9 +9,6 @@ def load_image(image_path):
 def start_face_detection():
     # 顔検出のためのカスケード分類器を読み込む
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-    # 表情認識モデルを初期化
-    detector = FER()
 
     # Pygameを初期化
     pygame.init()
@@ -49,16 +46,18 @@ def start_face_detection():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
-        # 表情認識
-        emotions = detector.detect_emotions(frame)
-        main_emotion = "neutral"
-        if emotions:
+        # 表情認識をDeepFaceで行う
+        try:
+            # DeepFaceで表情認識を行う
+            analysis = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
             # 最も強い感情を取得
-            emotion = emotions[0]['emotions']
-            main_emotion = max(emotion, key=emotion.get)
+            emotion = analysis[0]['dominant_emotion']
+        except Exception as e:
+            print("Error in emotion analysis:", e)
+            emotion = "neutral"  # エラー時はデフォルトでneutral
 
         # 画像を更新
-        image = images.get(main_emotion, images["neutral"])
+        image = images.get(emotion, images["neutral"])
         image_rect = image.get_rect()
 
         # 顔が検出されたら、その位置に画像を移動

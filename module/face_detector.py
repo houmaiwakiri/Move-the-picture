@@ -7,7 +7,6 @@ def load_image(image_path):
     return pygame.image.load(image_path)
 
 def start_face_detection():
-    # 顔検出のためのカスケード分類器を読み込む
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
     pygame.init()
